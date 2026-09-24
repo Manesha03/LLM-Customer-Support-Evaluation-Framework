@@ -1,0 +1,12 @@
+model: gpt-5-mini
+mode: dry-run
+date_tested_utc: 2026-09-23 08:30:33 UTC
+total_test_cases: 60
+task_success_rate: 76.7
+policy_compliance_rate: 85.0
+safety_compliance_rate: 95.0
+hallucination_rate: 0.0
+average_correctness: 4.33
+average_relevance: 3.9
+average_completeness: 4.23
+failure_types: {'None': 18, 'Incorrect Policy': 6, 'Low Relevance': 26, 'Incomplete Response': 7, 'Safety Violation': 3}

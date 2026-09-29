@@ -3,6 +3,8 @@ import csv
 import json
 import os
 import re
+import urllib.error
+import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -124,6 +126,42 @@ def call_openai_model(model, customer_input):
         ],
     )
     return response.output_text.strip()
+
+
+def call_ollama_model(model, customer_input, host):
+    payload = {
+        "model": model,
+        "stream": False,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": customer_input},
+        ],
+    }
+    request = urllib.request.Request(
+        f"{host.rstrip('/')}/api/chat",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=120) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.URLError as error:
+        raise RuntimeError(
+            "Could not connect to Ollama. Make sure Ollama is installed, running, "
+            f"and the model is available with: ollama pull {model}"
+        ) from error
+
+    return result["message"]["content"].strip()
+
+
+def call_model(provider, model, customer_input, ollama_host):
+    if provider == "openai":
+        return call_openai_model(model, customer_input)
+    if provider == "ollama":
+        return call_ollama_model(model, customer_input, ollama_host)
+    raise ValueError(f"Unsupported provider: {provider}")
 
 
 def call_judge_model(model, row):
@@ -317,7 +355,7 @@ def important_tokens(text):
     return [token for token in re.findall(r"[a-z0-9]+", text) if len(token) > 3 and token not in stopwords]
 
 
-def summarize(rows, model, dry_run):
+def summarize(rows, model, provider, dry_run):
     total = len(rows)
     successes = sum(int(row["task_success"]) for row in rows)
     policy = sum(int(row["policy_compliance"]) for row in rows)
@@ -330,6 +368,7 @@ def summarize(rows, model, dry_run):
 
     return {
         "model": model,
+        "provider": "dry-run" if dry_run else provider,
         "mode": "dry-run" if dry_run else "live-api",
         "date_tested_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "total_test_cases": total,
@@ -356,7 +395,9 @@ def main():
     parser.add_argument("--input", default="data/test_cases.csv", help="Input test case CSV.")
     parser.add_argument("--output", default="results/evaluation_results.csv", help="Output scored CSV.")
     parser.add_argument("--summary", default="results/summary.txt", help="Output summary text file.")
+    parser.add_argument("--provider", choices=["openai", "ollama"], default="openai", help="Model provider to test.")
     parser.add_argument("--model", default="gpt-5-mini", help="Model name to test.")
+    parser.add_argument("--ollama-host", default="http://localhost:11434", help="Ollama server URL.")
     parser.add_argument("--judge-model", default=None, help="Optional LLM-as-a-judge model for 1-5 quality scores.")
     parser.add_argument("--limit", type=int, default=None, help="Optional number of cases to run.")
     parser.add_argument("--dry-run", action="store_true", help="Use deterministic local placeholder responses instead of API calls.")
@@ -366,7 +407,7 @@ def main():
     if args.limit:
         rows = rows[: args.limit]
 
-    if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
+    if not args.dry_run and args.provider == "openai" and not os.getenv("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is not set. Set it or run with --dry-run.")
 
     evaluated = []
@@ -375,12 +416,12 @@ def main():
             if args.dry_run:
                 row["llm_output"] = dry_run_response(row["customer_input"])
             else:
-                row["llm_output"] = call_openai_model(args.model, row["customer_input"])
+                row["llm_output"] = call_model(args.provider, args.model, row["customer_input"], args.ollama_host)
         evaluated.append(score_row(row, judge_model=args.judge_model))
         print(f"Evaluated {index}/{len(rows)}: {row['test_id']}")
 
     write_rows(args.output, evaluated)
-    summary = summarize(evaluated, args.model, args.dry_run)
+    summary = summarize(evaluated, args.model, args.provider, args.dry_run)
     write_summary(args.summary, summary)
 
     print("\nSummary")

@@ -69,18 +69,19 @@ The CSV includes:
 
 - `test_id`
 - `category`
-- `customer_message`
+- `customer_input`
 - `expected_output`
 - `expected_criteria`
-- `actual_llm_output`
+- `llm_output`
 - `correctness_score`
 - `relevance_score`
 - `completeness_score`
 - `policy_compliance`
 - `hallucination`
-- `safety`
+- `safety_compliance`
 - `task_success`
-- `failure_reason`
+- `failure_type`
+- `notes`
 
 ## Run Evaluation
 
@@ -97,6 +98,15 @@ This creates:
 - `results/evaluation_results.csv`
 - `results/summary.txt`
 
+To test a local LLM without an API key, install Ollama, download a model, and run:
+
+```bash
+ollama pull llama3.2
+python src/run_evaluation.py --provider ollama --model llama3.2
+```
+
+Ollama must be running locally at `http://localhost:11434`. You can use `--ollama-host` if your Ollama server uses a different URL.
+
 To run against an API-accessible OpenAI model, first install dependencies:
 
 ```bash
@@ -112,13 +122,13 @@ $env:OPENAI_API_KEY="your_api_key_here"
 Run the 60 ShopEase prompts:
 
 ```bash
-python src/run_evaluation.py --model gpt-5-mini
+python src/run_evaluation.py --provider openai --model gpt-5-mini
 ```
 
 To use hybrid scoring with an LLM judge for correctness, relevance, and completeness:
 
 ```bash
-python src/run_evaluation.py --model gpt-5-mini --judge-model gpt-5-mini
+python src/run_evaluation.py --provider openai --model gpt-5-mini --judge-model gpt-5-mini
 ```
 
 The tested model name and UTC test date are saved in `results/summary.txt`.

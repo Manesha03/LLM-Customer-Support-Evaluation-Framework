@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ShopEase Support Chat</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="support-panel" aria-label="ShopEase support chatbot">
+        <header class="chat-header">
+          <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true">S</div>
+            <div>
+              <p class="eyebrow">ShopEase Help Center</p>
+              <h1>How can we help today? 😊</h1>
+              <p class="header-copy">Fast help with orders, returns, refunds, delivery, payments, and account questions.</p>
+            </div>
+          </div>
+          <span class="status"><span aria-hidden="true"></span> Online now</span>
+        </header>
+
+        <div class="quick-actions" aria-label="Common support topics">
+          <button type="button" data-prompt="Where is my order #SE1001?">
+            <span>Track my order</span>
+            <small>📦 Check delivery status</small>
+          </button>
+          <button type="button" data-prompt="I was charged twice for one order.">
+            <span>Billing help</span>
+            <small>💳 Charges and payments</small>
+          </button>
+          <button type="button" data-prompt="Can I return an item I received 20 days ago?">
+            <span>Start a return</span>
+            <small>↩️ Refunds and exchanges</small>
+          </button>
+          <button type="button" data-prompt="Can I have a human agent?">
+            <span>Talk to support</span>
+            <small>👋 Get extra help</small>
+          </button>
+        </div>
+
+        <div id="chatLog" class="chat-log" aria-live="polite">
+          <article class="message bot">
+            <div class="avatar">S</div>
+            <p>Hi, welcome to ShopEase support 👋 Tell me what happened, and I will help with the next step.</p>
+          </article>
+        </div>
+
+        <form id="chatForm" class="composer">
+          <p class="privacy-note">🔒 Please do not enter passwords, full card numbers, or CVV codes.</p>
+          <div class="composer-row">
+            <label class="sr-only" for="messageInput">Message</label>
+            <textarea id="messageInput" rows="2" placeholder="Type your question here..." required></textarea>
+            <button type="submit">Send</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

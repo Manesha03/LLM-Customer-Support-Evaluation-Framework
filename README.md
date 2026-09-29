@@ -30,6 +30,9 @@ They cover:
 - `data/customer_support_test_cases.json` - 55 independently designed test cases with expected outputs and scoring criteria.
 - `data/model_outputs.csv` - sample LLM responses used for the included evaluation run.
 - `src/evaluate.py` - scoring script that calculates quantitative metrics and failure patterns.
+- `src/chatbot.py` - command-line ShopEase customer support chatbot for demos and manual testing.
+- `src/web_app.py` - browser-based ShopEase chatbot for non-technical users.
+- `web/` - HTML, CSS, and JavaScript files for the chatbot interface.
 - `reports/final_technical_report.md` - final technical report with methodology, results, and recommendations.
 - `reports/evaluation_results.json` - generated evaluation output from the sample run.
 
@@ -82,6 +85,50 @@ The CSV includes:
 - `task_success`
 - `failure_type`
 - `notes`
+
+## Run Browser Chatbot
+
+For non-technical users, start the full-screen browser chatbot:
+
+```bash
+python src/web_app.py
+```
+
+Then open this in a browser:
+
+```text
+http://127.0.0.1:8000
+```
+
+The browser UI includes quick action buttons, a customer-friendly chat layout, privacy reminders, and a local policy-based chatbot that works without an API key.
+
+Optional LLM-backed modes:
+
+```bash
+python src/web_app.py --provider ollama --model llama3.2
+python src/web_app.py --provider openai --model gpt-5-mini
+```
+
+## Run Command-Line Chatbot
+
+Run the local policy-based chatbot without an API key:
+
+```bash
+python src/chatbot.py
+```
+
+Run one prompt:
+
+```bash
+python src/chatbot.py --message "I was charged twice for one order."
+```
+
+Optional LLM-backed modes:
+
+```bash
+python src/chatbot.py --provider ollama --model llama3.2
+python src/chatbot.py --provider openai --model gpt-5-mini
+```
 
 ## Run Evaluation
 
